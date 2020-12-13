@@ -1,0 +1,27 @@
+function fhandleout = ploterror(ref_freqs, ref_tf, query_ir, fs, fhandlein)
+    if isempty(fhandlein)
+        fhandleout = figure;
+    else
+        fhandleout = figure(fhandlein);
+    end
+    
+    fft_len = 2^ceil(log2(numel(query_ir)));
+    
+    % interpolate
+    query_tf = fft(query_ir,fft_len);
+    fftfreqs = (0:(fft_len-1)).*fs/fft_len;
+    
+    refdata_interp = interp1(ref_freqs,ref_tf,fftfreqs);
+    
+    error = refdata_interp - query_tf;
+    
+    plot(fftfreqs,refdata_interp);
+    hold on;
+    plot(fftfreqs,20*log10(abs(query_tf)));
+    hold off;
+    
+    xlim([20,fs/2]);
+    
+    
+end
+
