@@ -37,11 +37,17 @@ function C = gram2gain(B,compgains,compfreqs,fs)
 
     Cgains = contrib;
     for ii = 1:numel(B)
+        contrib(ii,:) = contrib(ii,:)./contribsums(ii); % normalize
         Cgains(ii,:) = contrib(ii,:).*compgains;
     end
-    
-    Cgains = sum(Cgains,2) ./ contribsums;
+%     Cgains = Cgains./contribsums;
+    Cgains = sum(Cgains,2);
     Cgains(isnan(Cgains)) = 0;
+    
+    % TODO: iterative; for each B, iteratively boost and query the
+    % frequencies affected until minimum statistics is met
+    
+    % ITERATE BY: usable -6dB bandwidth? -40dB/thresh bandwidth? hard code?
     
     C = B;
     for ii = 1:numel(B)

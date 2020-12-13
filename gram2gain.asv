@@ -37,10 +37,12 @@ function C = gram2gain(B,compgains,compfreqs,fs)
 
     Cgains = contrib;
     for ii = 1:numel(B)
-        Cgains(ii,:) = Cgains(ii,:).*compgains;
+        contrib()
+        Cgains(ii,:) = contrib(ii,:).*compgains;
     end
-    
+    Cgains = Cgains./contribsums;
     Cgains = sum(Cgains,2);
+    Cgains(isnan(Cgains)) = 0;
     
     C = B;
     for ii = 1:numel(B)
