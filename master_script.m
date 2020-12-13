@@ -1,9 +1,14 @@
-close all; clearvars; clc;
+clearvars; clc;
 
 %% params
 
 audiogram_freqs = [250,500,1000,2000,4000,8000];
-audiogram_data = [-10, -15, -22, -40, -50, -65];
+audiogram_data = [-15, -26, -35, -55, -95, -65]; % from paper
+%audiogram_data = [0, -10, -20, -30, -40, -50]; % 10dB/oct falling threshold
+%audiogram_data = [-50, -40, -30, -20, -10, 0]; % 10dB/oct rising threshold
+%audiogram_data = [-20,-20,-20,-20,-20,-20]; % constant
+%audiogram_data = [-20,0,-20,0,-20,0]; % zigzag
+
 audiogram_comp = 0 - audiogram_data;
 
 fs = 16000;
@@ -173,8 +178,11 @@ fh.fig4 = figure('name', 'Filter banks');
 [~] = plotfig(B(7).ir, fs, 'mag', fh.fig4, 'B(7).ir');
 [~] = plotfig(B(8).ir, fs, 'mag', fh.fig4, 'B(8).ir');
 hold on;
-scatter(audiogram_freqs,5*ones(size(audiogram_freqs)),'kx', 'linewidth', 1.5);
+plot(audiogram_freqs,5*ones(size(audiogram_freqs)),'kx:', 'linewidth', 1.5);
 hold off;
+
+%%
+ploterror(audiogram_freqs,audiogram_comp,Csum,fs,[]);
 
 %%
 fh.fig5 = figure('name', 'Filter banks');
@@ -188,8 +196,9 @@ fh.fig5 = figure('name', 'Filter banks');
 [~] = plotfig(C(8).ir, fs, 'maglog', fh.fig5, 'C(8).ir');
 [~] = plotfig(Csum, fs, 'maglog', fh.fig5, 'fbsum');
 hold on;
-scatter(audiogram_freqs,audiogram_comp,'kx', 'linewidth', 1.5);
+plot(audiogram_freqs,audiogram_comp,'kx:', 'linewidth', 1.5);
 hold off;
+ylim([0,100]);
 
 
 %%
