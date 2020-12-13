@@ -50,8 +50,6 @@ else
         end
     end
 end
-    
-
 
 %% make filts
 
@@ -110,16 +108,20 @@ B(4).ir = P(4).ir - P(3).ir;
 B(5).ir = P(5).ir - P(6).ir;
 
 %% add gains
-C(1).ir = 10^(audiogram_comp(1)/20)*B(1).ir;
-C(2).ir = 10^((audiogram_comp(3)-4)/20)*B(2).ir;
-C(3).ir = 10^((audiogram_comp(3)+3)/20)*B(3).ir;
-C(4).ir = 10^(45/20)*B(4).ir;
-C(5).ir = 10^(53/20)*B(5).ir;
-C(6).ir = B(6).ir;
-C(7).ir = B(7).ir;
-C(8).ir = 10^(65/20)*B(8).ir;
+% C(1).ir = 10^(audiogram_comp(1)/20)*B(1).ir;
+% C(2).ir = 10^((audiogram_comp(3)-4)/20)*B(2).ir;
+% C(3).ir = 10^((audiogram_comp(3)+3)/20)*B(3).ir;
+% C(4).ir = 10^(45/20)*B(4).ir;
+% C(5).ir = 10^(53/20)*B(5).ir;
+% C(6).ir = B(6).ir;
+% C(7).ir = B(7).ir;
+% C(8).ir = 10^(65/20)*B(8).ir;
 
-fbsum = (C(1).ir+C(2).ir+C(3).ir+C(4).ir+C(5).ir+C(6).ir+C(7).ir+C(8).ir);
+C = gram2gain(B,audiogram_comp,audiogram_freqs,fs);
+
+Csum = (C(1).ir+C(2).ir+C(3).ir+C(4).ir+C(5).ir+C(6).ir+C(7).ir+C(8).ir);
+Bsum = (B(1).ir+B(2).ir+B(3).ir+B(4).ir+B(5).ir+B(6).ir+B(7).ir+B(8).ir);
+
 %% process
 Y(1).ir = conv(x,C(1).ir);
 Y(2).ir = conv(x,C(2).ir);
@@ -160,17 +162,31 @@ fh.fig4 = figure('name', 'Filter banks pre-subtraction');
 [~] = plotfig(P(7).ir, fs, 'mag', fh.fig4, 'P(7).ir');
 [~] = plotfig(P(8).ir, fs, 'mag', fh.fig4, 'P(8).ir');
 %}
+
+fh.fig4 = figure('name', 'Filter banks');
+[~] = plotfig(B(1).ir, fs, 'mag', fh.fig4, 'B(1).ir');
+[~] = plotfig(B(2).ir, fs, 'mag', fh.fig4, 'B(2).ir');
+[~] = plotfig(B(3).ir, fs, 'mag', fh.fig4, 'B(3).ir');
+[~] = plotfig(B(4).ir, fs, 'mag', fh.fig4, 'B(4).ir');
+[~] = plotfig(B(5).ir, fs, 'mag', fh.fig4, 'B(5).ir');
+[~] = plotfig(B(6).ir, fs, 'mag', fh.fig4, 'B(6).ir');
+[~] = plotfig(B(7).ir, fs, 'mag', fh.fig4, 'B(7).ir');
+[~] = plotfig(B(8).ir, fs, 'mag', fh.fig4, 'B(8).ir');
+hold on;
+scatter(audiogram_freqs,5*ones(size(audiogram_freqs)),'kx', 'linewidth', 1.5);
+hold off;
+
 %%
 fh.fig5 = figure('name', 'Filter banks');
-[~] = plotfig(C(1).ir, fs, 'maglog', fh.fig5, 'B(1).ir');
-[~] = plotfig(C(2).ir, fs, 'maglog', fh.fig5, 'B(2).ir');
-[~] = plotfig(C(3).ir, fs, 'maglog', fh.fig5, 'B(3).ir');
-[~] = plotfig(C(4).ir, fs, 'maglog', fh.fig5, 'B(4).ir');
-[~] = plotfig(C(5).ir, fs, 'maglog', fh.fig5, 'B(5).ir');
-[~] = plotfig(C(6).ir, fs, 'maglog', fh.fig5, 'B(6).ir');
-[~] = plotfig(C(7).ir, fs, 'maglog', fh.fig5, 'B(7).ir');
-[~] = plotfig(C(8).ir, fs, 'maglog', fh.fig5, 'B(8).ir');
-[~] = plotfig(fbsum, fs, 'maglog', fh.fig5, 'fbsum');
+[~] = plotfig(C(1).ir, fs, 'maglog', fh.fig5, 'C(1).ir');
+[~] = plotfig(C(2).ir, fs, 'maglog', fh.fig5, 'C(2).ir');
+[~] = plotfig(C(3).ir, fs, 'maglog', fh.fig5, 'C(3).ir');
+[~] = plotfig(C(4).ir, fs, 'maglog', fh.fig5, 'C(4).ir');
+[~] = plotfig(C(5).ir, fs, 'maglog', fh.fig5, 'C(5).ir');
+[~] = plotfig(C(6).ir, fs, 'maglog', fh.fig5, 'C(6).ir');
+[~] = plotfig(C(7).ir, fs, 'maglog', fh.fig5, 'C(7).ir');
+[~] = plotfig(C(8).ir, fs, 'maglog', fh.fig5, 'C(8).ir');
+[~] = plotfig(Csum, fs, 'maglog', fh.fig5, 'fbsum');
 hold on;
 scatter(audiogram_freqs,audiogram_comp,'kx', 'linewidth', 1.5);
 hold off;
