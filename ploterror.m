@@ -12,7 +12,6 @@ function fhandleout = ploterror(ref_freqs, ref_mag, query_ir, fs, fhandlein)
     query_tf = fft(query_ir,fft_len);
     query_mag = 20*log10(abs(query_tf));
     fftfreqs = (0:(fft_len-1)).*fs/fft_len;
-    
     ref_mag_interp = interp1(ref_freqs,ref_mag,fftfreqs,[],'extrap');
     
     error_tf = query_mag - ref_mag_interp;
