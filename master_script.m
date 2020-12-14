@@ -3,14 +3,14 @@ clearvars; clc;
 %% params
 
 agram_freqs = [250,500,1000,2000,4000,8000];
-%agram_data = [-10, -15, -22, -40, -50, -65]; % nice slope
-agram_data = [-15, -26, -35, -55, -95, -65]; % complex slope
+agram_data = [-10, -15, -22, -40, -50, -65]; % nice slope
+%agram_data = [-15, -26, -35, -55, -95, -65]; % complex slope
 %agram_data = [0, -10, -20, -30, -40, -50]; % 10dB/oct falling threshold
 %agram_data = [-50, -40, -30, -20, -10, 0]; % 10dB/oct rising threshold
 %agram_data = [-20,-20,-20,-20,-20,-20]; % constant
 %agram_data = [-20,0,-20,0,-20,0]; % zigzag
 
-agram_comp = 0 - agram_data;
+agram_comp = 0 - agram_data; % compensation
 
 fs = 16000;
 
@@ -138,6 +138,7 @@ hold on;
 plot(agram_freqs,5*ones(size(agram_freqs)),'kx:', 'linewidth', 1.5);
 hold off;
 %}
+
 %%
 fh.fig2 = figure('name', 'Matching Errors');
 [~] = ploterror(agram_freqs2, agram_comp2, C1sum, fs, fh.fig2, 'Interpolated', 'r:', true);

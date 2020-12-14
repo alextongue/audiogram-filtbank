@@ -1,4 +1,5 @@
 function C = gram2gain(B,compgains,compfreqs,fs,opt_method,thresh)
+% (! iterative method assumes unimodal or monotonic (LP/HP/BP shape) of filter bank !)
 
     % Input params / prep.
     assert(numel(compgains)==numel(compfreqs), 'number of gains ~= number of frequencies');
@@ -24,6 +25,7 @@ function C = gram2gain(B,compgains,compfreqs,fs,opt_method,thresh)
     % Find optimal gains.
     Bgains = ones(numel(B),1);
     switch opt_method
+        
         case 1 % method 1: relative influence
             % Find filterbanks that contribute to each audiogram frequency.
             matchidx = zeros(size(compfreqs));
@@ -84,7 +86,7 @@ function C = gram2gain(B,compgains,compfreqs,fs,opt_method,thresh)
                     iter = iter+1;
                 end
                 Cgains(ii) = boost_curr;
-                fprintf('B%d : iter=%d, boost=%.2fdB, error=%.4f\n',...
+                fprintf('C%d : iter=%d, boost=%.2fdB, error=%.4f\n',...
                     ii, iter-1, 20*log10(boost_curr), errsum_ref)
             end
             
