@@ -1,14 +1,9 @@
-function fhandleout = ploterror(ref_freqs, ref_gains, query_ir, fs, fhandlein, dispname, lineformat, plotref)
+function fhandleout = ploterror(ref_freqs, ref_gains, query_ir, fs, fhandlein, dispname, plotref)
     if isempty(fhandlein)
         fhandleout = figure;
     else
         fhandleout = figure(fhandlein);
     end
-    
-    if isempty(lineformat)
-        lineformat = 'k:';
-    end
-    
     
     logplot = true; % (! HARD CODED FOR NOW !)
     fft_len = 2^ceil(log2(numel(query_ir)));
@@ -24,9 +19,8 @@ function fhandleout = ploterror(ref_freqs, ref_gains, query_ir, fs, fhandlein, d
     subplot(2,1,1);
     hold on;
     if plotref
-        plot(fftfreqs,ref_mag_interp,'k','linewidth',1.5,'displayname','Audiogram Ref.');
-    end
-    plot(fftfreqs,query_mag,lineformat,'linewidth',1.5,'displayname',dispname);
+    plot(fftfreqs,ref_mag_interp,'k','linewidth',1.5,'displayname','Audiogram Ref.');
+    plot(fftfreqs,query_mag,'k:','linewidth',1.5,'displayname',dispname);
     hold off;
     if logplot
         set(gca,'XScale','log');
@@ -37,16 +31,14 @@ function fhandleout = ploterror(ref_freqs, ref_gains, query_ir, fs, fhandlein, d
     
     subplot(2,1,2);
     hold on;
-    if plotref
-        plot(fftfreqs,zeros(size(fftfreqs)),'k','linewidth',1.5,'displayname','Audiogram Ref');
-    end
-    plot(fftfreqs,error_tf,lineformat,'linewidth',1.5,'displayname',dispname)
+    plot(fftfreqs,zeros(size(fftfreqs)),'k','linewidth',1.5,'displayname','Audiogram Ref');
+    plot(fftfreqs,error_tf,'k:','linewidth',1.5,'displayname',dispname)
     hold off;
     if logplot
         set(gca,'XScale','log');
     end
     xlim([20,fs/2])
-    ylim([-15,15]);
+    ylim([-10,10]);
     grid on;
     legend('location','best');
     title('dB Error');
