@@ -3,8 +3,9 @@ clearvars; clc;
 %% params
 
 audiogram_freqs = [250,500,1000,2000,4000,8000];
-audiogram_data = [-15, -26, -35, -55, -95, -65]; % from paper
-%audiogram_data = [0, -10, -20, -30, -40, -50]; % 10dB/oct falling threshold
+%audiogram_data = [-10 -15 -22 -40 -50 -65];
+%audiogram_data = [-15, -26, -35, -55, -95, -65]; % from paper
+audiogram_data = [0, -10, -20, -30, -40, -50]; % 10dB/oct falling threshold
 %audiogram_data = [-50, -40, -30, -20, -10, 0]; % 10dB/oct rising threshold
 %audiogram_data = [-20,-20,-20,-20,-20,-20]; % constant
 %audiogram_data = [-20,0,-20,0,-20,0]; % zigzag
@@ -122,7 +123,12 @@ B(5).ir = P(5).ir - P(6).ir;
 % C(7).ir = B(7).ir;
 % C(8).ir = 10^(65/20)*B(8).ir;
 
-C = gram2gain(B,audiogram_comp,audiogram_freqs,fs);
+C = gram2gain(B,audiogram_comp,audiogram_freqs,fs,1,-60); % optimization method 1, thresh=-60dB
+C(6).ir = 10^(48/20)*B(6).ir;
+C(7).ir = 10^(50/20)*B(7).ir;
+
+% C = gram2gain(B,audiogram_comp,audiogram_freqs,fs,2,-3); % optimization method 2
+
 
 Csum = (C(1).ir+C(2).ir+C(3).ir+C(4).ir+C(5).ir+C(6).ir+C(7).ir+C(8).ir);
 Bsum = (B(1).ir+B(2).ir+B(3).ir+B(4).ir+B(5).ir+B(6).ir+B(7).ir+B(8).ir);
