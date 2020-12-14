@@ -1,4 +1,4 @@
-function C = gram2gain(B,compgains,compfreqs,fs,opt_method,pb_thresh)
+function C = gram2gain(B,compgains,compfreqs,fs,opt_method,thresh)
 
     % Input params / prep.
     assert(numel(compgains)==numel(compfreqs), 'number of gains ~= number of frequencies');
@@ -38,8 +38,8 @@ function C = gram2gain(B,compgains,compfreqs,fs,opt_method,pb_thresh)
                     contrib(ii,jj) = (abs(B(ii).tf(matchidx(jj)))); % linear magn.
                 end
             end
-            if ~isempty(pb_thresh)
-                contrib(20*log10(contrib) < pb_thresh) = 0; % omit values below thresh
+            if ~isempty(thresh) % contribution discard threshold
+                contrib(20*log10(contrib) < thresh) = 0;
             end
             Cgains = contrib;
             for ii = 1:numel(B)
@@ -59,7 +59,7 @@ function C = gram2gain(B,compgains,compfreqs,fs,opt_method,pb_thresh)
             converg_thresh = 1e-8;
             
             for ii = 1:numel(B)
-                pb_idxs = 20*log10(abs(B(ii).tfhalf)) > pb_thresh; % isolate passband
+                pb_idxs = 20*log10(abs(B(ii).tfhalf)) > thresh; % passband threshold
                 B(ii).cropfreqs = fftfreqs(pb_idxs);
                 B(ii).crop = B(ii).tf(pb_idxs);
                 agram_crop = agram_interp(pb_idxs);
