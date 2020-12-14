@@ -173,16 +173,17 @@ ylim([10,100]);
 legend hide;
 title('Audiogram Match (Iterative Optimization)');
 
+%%
 %{
 fh.fig6 = figure('name', 'Filter banks IR');
-[~] = plotfig(C(1).ir, fs, 'imp', fh.fig6, 'B(1).ir');
-[~] = plotfig(C(2).ir, fs, 'imp', fh.fig6, 'B(2).ir');
-[~] = plotfig(C(3).ir, fs, 'imp', fh.fig6, 'B(3).ir');
-[~] = plotfig(C(4).ir, fs, 'imp', fh.fig6, 'B(4).ir');
-[~] = plotfig(C(5).ir, fs, 'imp', fh.fig6, 'B(5).ir');
-[~] = plotfig(C(6).ir, fs, 'imp', fh.fig6, 'B(6).ir');
-[~] = plotfig(C(7).ir, fs, 'imp', fh.fig6, 'B(7).ir');
-[~] = plotfig(C(8).ir, fs, 'imp', fh.fig6, 'B(8).ir');
+[~] = plotfig(B(1).ir, fs, 'phase', fh.fig6, 'B(1).ir',[]);
+[~] = plotfig(B(2).ir, fs, 'phase', fh.fig6, 'B(2).ir',[]);
+[~] = plotfig(B(3).ir, fs, 'phase', fh.fig6, 'B(3).ir',[]);
+[~] = plotfig(B(4).ir, fs, 'phase', fh.fig6, 'B(4).ir',[]);
+[~] = plotfig(B(5).ir, fs, 'phase', fh.fig6, 'B(5).ir',[]);
+[~] = plotfig(B(6).ir, fs, 'phase', fh.fig6, 'B(6).ir',[]);
+[~] = plotfig(B(7).ir, fs, 'phase', fh.fig6, 'B(7).ir',[]);
+[~] = plotfig(B(8).ir, fs, 'phase', fh.fig6, 'B(8).ir',[]);
 %}
 %%
 fh.fig4 = figure('name','Signal In/Out');
