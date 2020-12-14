@@ -2,15 +2,15 @@ clearvars; clc;
 
 %% params
 
-audiogram_freqs = [250,500,1000,2000,4000,8000];
-%audiogram_data = [-10 -15 -22 -40 -50 -65];
-%audiogram_data = [-15, -26, -35, -55, -95, -65]; % from paper
-audiogram_data = [0, -10, -20, -30, -40, -50]; % 10dB/oct falling threshold
-%audiogram_data = [-50, -40, -30, -20, -10, 0]; % 10dB/oct rising threshold
-%audiogram_data = [-20,-20,-20,-20,-20,-20]; % constant
-%audiogram_data = [-20,0,-20,0,-20,0]; % zigzag
+agram_freqs = [250,500,1000,2000,4000,8000];
+agram_data = [-10, -15, -22, -40, -50, -65];
+%agram_data = [-15, -26, -35, -55, -95, -65]; % from paper
+%agram_data = [0, -10, -20, -30, -40, -50]; % 10dB/oct falling threshold
+%agram_data = [-50, -40, -30, -20, -10, 0]; % 10dB/oct rising threshold
+%agram_data = [-20,-20,-20,-20,-20,-20]; % constant
+%agram_data = [-20,0,-20,0,-20,0]; % zigzag
 
-audiogram_comp = 0 - audiogram_data;
+agram_comp = 0 - agram_data;
 
 fs = 16000;
 
@@ -24,7 +24,8 @@ F_bw = 0.125*fs; % bandwidth (Hz)
 % H_f0 = 0.45*fs; % passband edge
 
 
-%% input
+%% File input.
+
 % filename
 fname = fullfile(pwd, 'FB_male_female_single-talk_seq.wav');
 frange = [1,48000];
@@ -57,92 +58,47 @@ else
     end
 end
 
-%% make filts
-
-% prototype filters are lin. phase (grpdelay == N/2)
-Hproto = dsp.FIRHalfbandDecimator(...
-    'Specification','Filter order and transition width', ...
-    'FilterOrder',H_order, ...
-    'TransitionWidth',H_bw, ...
-    'SampleRate',fs);
-
-Fproto = dsp.FIRHalfbandDecimator(...
-    'Specification','Filter order and transition width', ...
-    'FilterOrder',F_order, ...
-    'TransitionWidth',F_bw, ...
-    'SampleRate',fs);
-
-% upsample and find complement
-H = Hproto.coeffs.Numerator;
-Hc = find_complement(H);
-H2 = upsample(H,2);
-H4 = upsample(H,4);
-H8 = upsample(H,8);
-
-F = Fproto.coeffs.Numerator;
-Fc = find_complement(F);
-F2 = upsample(F,2);
-F4 = upsample(F,4);
-F8 = upsample(F,8);
-
-% derive P(1).ir-P(8).ir
-P(1).ir = conv(conv(conv(H8, F4), F2), F);
-P(8).ir = conv(conv(conv(H8, F4), F2), Fc);
-P(2).ir = conv(conv(H4,F2),F);
-P(7).ir = conv(conv(H4,F2),Fc);
-P(3).ir = conv(H2, F);
-P(6).ir = conv(H2, Fc);
-P(4).ir = H;
-P(5).ir = Hc;
-
-% add delays
-B(1).ir = P(1).ir;
-B(8).ir = P(8).ir;
-P(2).ir = match_lp_gd(P(2).ir,P(1).ir);
-P(7).ir = match_lp_gd(P(7).ir,P(8).ir);
-P(3).ir = match_lp_gd(P(3).ir,P(2).ir);
-P(6).ir = match_lp_gd(P(6).ir,P(7).ir);
-P(4).ir = match_lp_gd(P(4).ir,P(3).ir);
-P(5).ir = match_lp_gd(P(5).ir,P(6).ir);
-
-% subtract
-B(2).ir = P(2).ir - P(1).ir;
-B(7).ir = P(7).ir - P(8).ir;
-B(3).ir = P(3).ir - P(2).ir;
-B(6).ir = P(6).ir - P(7).ir;
-B(4).ir = P(4).ir - P(3).ir;
-B(5).ir = P(5).ir - P(6).ir;
-
-%% add gains
-% C(1).ir = 10^(audiogram_comp(1)/20)*B(1).ir;
-% C(2).ir = 10^((audiogram_comp(3)-4)/20)*B(2).ir;
-% C(3).ir = 10^((audiogram_comp(3)+3)/20)*B(3).ir;
-% C(4).ir = 10^(45/20)*B(4).ir;
-% C(5).ir = 10^(53/20)*B(5).ir;
-% C(6).ir = B(6).ir;
-% C(7).ir = B(7).ir;
-% C(8).ir = 10^(65/20)*B(8).ir;
-
-C = gram2gain(B,audiogram_comp,audiogram_freqs,fs,1,-60); % optimization method 1, thresh=-60dB
-C(6).ir = B(6).ir;
-C(7).ir = B(7).ir;
-
-% C = gram2gain(B,audiogram_comp,audiogram_freqs,fs,2,-3); % optimization method 2
-
-
-Csum = (C(1).ir+C(2).ir+C(3).ir+C(4).ir+C(5).ir+C(6).ir+C(7).ir+C(8).ir);
+%% Derive filter banks.
+[B,P] = make_nonunif_fb(fs,H_order,H_bw,F_order,F_bw);
 Bsum = (B(1).ir+B(2).ir+B(3).ir+B(4).ir+B(5).ir+B(6).ir+B(7).ir+B(8).ir);
 
-%% process
-Y(1).ir = conv(x,C(1).ir);
-Y(2).ir = conv(x,C(2).ir);
-Y(3).ir = conv(x,C(3).ir);
-Y(4).ir = conv(x,C(4).ir);
-Y(5).ir = conv(x,C(5).ir);
-Y(6).ir = conv(x,C(6).ir);
-Y(7).ir = conv(x,C(7).ir);
-Y(8).ir = conv(x,C(8).ir);
+%% add gains
 
+% hand-tuned gains
+%{
+C(1).ir = 10^(audiogram_comp(1)/20)*B(1).ir;
+C(2).ir = 10^((audiogram_comp(3)-4)/20)*B(2).ir;
+C(3).ir = 10^((audiogram_comp(3)+3)/20)*B(3).ir;
+C(4).ir = 10^(45/20)*B(4).ir;
+C(5).ir = 10^(53/20)*B(5).ir;
+C(6).ir = B(6).ir;
+C(7).ir = B(7).ir;
+C(8).ir = 10^(65/20)*B(8).ir;
+%}
+
+% C = gram2gain(B,audiogram_comp,audiogram_freqs,fs,1,-60); % optimization method 1, thresh=-60dB
+% C(6).ir = 10^(48/20)*B(6).ir;
+% C(7).ir = 10^(50/20)*B(7).ir;
+
+% sarah
+audiogram_freqs1 = [250 500 1000 2000 4000 6000 7000 8000];
+audiogram_comp1 = audiogramMatch(agram_comp);
+C1 = gram2gain(B,audiogram_comp1,audiogram_freqs1,fs,1,-60); % optimization method 1
+C1sum = (C1(1).ir+C1(2).ir+C1(3).ir+C1(4).ir+C1(5).ir+C1(6).ir+C1(7).ir+C1(8).ir);
+
+C2 = gram2gain(B,audiogram_comp1,audiogram_freqs1,fs,1,-60); % optimization method 1
+C2sum = (C2(1).ir+C2(2).ir+C2(3).ir+C2(4).ir+C2(5).ir+C2(6).ir+C2(7).ir+C2(8).ir);
+
+C3 = gram2gain(B,agram_comp,agram_freqs,fs,2,-3); % optimization method 2
+C2sum = (C3(1).ir+C3(2).ir+C3(3).ir+C3(4).ir+C3(5).ir+C3(6).ir+C3(7).ir+C3(8).ir);
+
+
+
+%% process
+Y = B;
+for ii = 1:numel(C)
+    Y(ii).ir = conv(x,C(ii).ir);
+end
 sumtest = (Y(1).ir+Y(2).ir+Y(3).ir+Y(4).ir+Y(5).ir+Y(6).ir+Y(7).ir+Y(8).ir);
 
 %%
@@ -184,11 +140,12 @@ fh.fig4 = figure('name', 'Filter banks');
 [~] = plotfig(B(7).ir, fs, 'mag', fh.fig4, 'B(7).ir');
 [~] = plotfig(B(8).ir, fs, 'mag', fh.fig4, 'B(8).ir');
 hold on;
-plot(audiogram_freqs,5*ones(size(audiogram_freqs)),'kx:', 'linewidth', 1.5);
+plot(agram_freqs,5*ones(size(agram_freqs)),'kx:', 'linewidth', 1.5);
 hold off;
 
 %%
-ploterror(audiogram_freqs,audiogram_comp,Csum,fs,[]);
+% ploterror(audiogram_freqs,audiogram_comp,Csum,fs,[]); % alex
+ploterror([250 500 1000 2000 4000 6000 7000 8000],audiogram_comp1,Csum,fs,[]); % sarah
 
 %%
 fh.fig5 = figure('name', 'Filter banks');
@@ -202,7 +159,8 @@ fh.fig5 = figure('name', 'Filter banks');
 [~] = plotfig(C(8).ir, fs, 'maglog', fh.fig5, 'C(8).ir');
 [~] = plotfig(Csum, fs, 'maglog', fh.fig5, 'fbsum');
 hold on;
-plot(audiogram_freqs,audiogram_comp,'kx:', 'linewidth', 1.5);
+% plot(audiogram_freqs,audiogram_comp,'kx:', 'linewidth', 1.5); % alex
+plot([250 500 1000 2000 4000 6000 7000 8000],audiogram_comp1,'kx:', 'linewidth', 1.5); % sarah
 hold off;
 ylim([0,100]);
 
