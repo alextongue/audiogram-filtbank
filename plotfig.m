@@ -1,4 +1,4 @@
-function fhandleout = plotfig(plotdata, fs, domain, fhandlein, plotname)
+function fhandleout = plotfig(plotdata, fs, domain, fhandlein, plotname, linetype)
 
     if isempty(fhandlein)
         fhandleout = figure;
@@ -25,12 +25,11 @@ function fhandleout = plotfig(plotdata, fs, domain, fhandlein, plotname)
     end
     
     hold on;
-    plot(plotx, plotdata, 'linewidth', 1.5, 'displayname', plotname);
-%     if strcmpi(domain, 'mag') ...
-%         || strcmpi(domain, 'maglin') ...
-%         || strcmpi(domain, 'grp')
-%         plot(plotx2, plotdata2, 'linewidth', 1, 'displayname', plotname);
-%     end
+    if ~isempty(linetype)
+        plot(plotx, plotdata, linetype, 'linewidth', 1.5, 'displayname', plotname);
+    else
+        plot(plotx, plotdata, 'linewidth', 1.5, 'displayname', plotname);
+    end
     hold off;
     
     % format

@@ -24,7 +24,7 @@ function fhandleout = ploterror(ref_freqs, ref_gains, query_ir, fs, fhandlein, d
     subplot(2,1,1);
     hold on;
     if plotref
-        plot(fftfreqs,ref_mag_interp,'k','linewidth',1.5,'displayname','Audiogram Ref.');
+        plot(fftfreqs,ref_mag_interp,'k','linewidth',1.5,'displayname','Audiogram (Reference)');
     end
     plot(fftfreqs,query_mag,lineformat,'linewidth',1.5,'displayname',dispname);
     hold off;
@@ -32,13 +32,16 @@ function fhandleout = ploterror(ref_freqs, ref_gains, query_ir, fs, fhandlein, d
         set(gca,'XScale','log');
     end
     xlim([20,fs/2]);
+    xlabel('Frequency');
+    ylabel('[dB]');
     grid on;
     legend('location','best');
+    title('Audiogram vs. Approximations');
     
     subplot(2,1,2);
     hold on;
     if plotref
-        plot(fftfreqs,zeros(size(fftfreqs)),'k','linewidth',1.5,'displayname','Audiogram Ref');
+        plot(fftfreqs,zeros(size(fftfreqs)),'k','linewidth',1.5,'displayname','Audiogram (Reference)');
     end
     plot(fftfreqs,error_tf,lineformat,'linewidth',1.5,'displayname',dispname)
     hold off;
@@ -47,6 +50,8 @@ function fhandleout = ploterror(ref_freqs, ref_gains, query_ir, fs, fhandlein, d
     end
     xlim([20,fs/2])
     ylim([-15,15]);
+    xlabel('Frequency');
+    ylabel('[dB]');
     grid on;
     legend('location','best');
     title('dB Error');

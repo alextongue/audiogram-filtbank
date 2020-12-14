@@ -3,7 +3,7 @@ clearvars; clc;
 %% params
 
 agram_freqs = [250,500,1000,2000,4000,8000];
-agram_data = [-10, -15, -22, -40, -50, -65]; % nice slope
+agram_data = [-10, -15, -22, -40, -50, -65]; % monotonic slope
 %agram_data = [-15, -26, -35, -55, -95, -65]; % complex slope
 %agram_data = [0, -10, -20, -30, -40, -50]; % 10dB/oct falling threshold
 %agram_data = [-50, -40, -30, -20, -10, 0]; % 10dB/oct rising threshold
@@ -86,12 +86,18 @@ C1sum = (C1(1).ir+C1(2).ir+C1(3).ir+C1(4).ir+C1(5).ir+C1(6).ir+C1(7).ir+C1(8).ir
 C2 = gram2gain(B,agram_comp,agram_freqs,fs,2,-3); % optimization method 2
 C2sum = (C2(1).ir+C2(2).ir+C2(3).ir+C2(4).ir+C2(5).ir+C2(6).ir+C2(7).ir+C2(8).ir);
 
+% iterative w/slope detection
+C3 = gram2gain(B,agram_comp,agram_freqs,fs,3,-6); % optimization method 2
+C3sum = (C3(1).ir+C3(2).ir+C3(3).ir+C3(4).ir+C3(5).ir+C3(6).ir+C3(7).ir+C3(8).ir);
+
+
+
 %% process
 Y = B;
-for ii = 1:numel(C)
-    Y(ii).ir = conv(x,C(ii).ir);
+for ii = 1:numel(C1)
+    Y(ii).ir = conv(x,C1(ii).ir);
 end
-sumtest = (Y(1).ir+Y(2).ir+Y(3).ir+Y(4).ir+Y(5).ir+Y(6).ir+Y(7).ir+Y(8).ir);
+Ysum = (Y(1).ir+Y(2).ir+Y(3).ir+Y(4).ir+Y(5).ir+Y(6).ir+Y(7).ir+Y(8).ir);
 
 %%
 % Prototype filters
@@ -124,42 +130,48 @@ fh.fig4 = figure('name', 'Filter banks pre-subtraction');
 %}
 
 % Flat filterbanks (B)
-%{
+
 fh.fig1 = figure('name', 'Filter banks');
-[~] = plotfig(B(1).ir, fs, 'mag', fh.fig4, 'B(1).ir');
-[~] = plotfig(B(2).ir, fs, 'mag', fh.fig4, 'B(2).ir');
-[~] = plotfig(B(3).ir, fs, 'mag', fh.fig4, 'B(3).ir');
-[~] = plotfig(B(4).ir, fs, 'mag', fh.fig4, 'B(4).ir');
-[~] = plotfig(B(5).ir, fs, 'mag', fh.fig4, 'B(5).ir');
-[~] = plotfig(B(6).ir, fs, 'mag', fh.fig4, 'B(6).ir');
-[~] = plotfig(B(7).ir, fs, 'mag', fh.fig4, 'B(7).ir');
-[~] = plotfig(B(8).ir, fs, 'mag', fh.fig4, 'B(8).ir');
+[~] = plotfig(B(1).ir, fs, 'mag', fh.fig1, 'B1','k');
+[~] = plotfig(B(2).ir, fs, 'mag', fh.fig1, 'B2','k');
+[~] = plotfig(B(3).ir, fs, 'mag', fh.fig1, 'B3','k');
+[~] = plotfig(B(4).ir, fs, 'mag', fh.fig1, 'B4','k');
+[~] = plotfig(B(5).ir, fs, 'mag', fh.fig1, 'B5','k');
+[~] = plotfig(B(6).ir, fs, 'mag', fh.fig1, 'B6','k');
+[~] = plotfig(B(7).ir, fs, 'mag', fh.fig1, 'B7','k');
+[~] = plotfig(B(8).ir, fs, 'mag', fh.fig1, 'B8','k');
 hold on;
-plot(agram_freqs,5*ones(size(agram_freqs)),'kx:', 'linewidth', 1.5);
+plot(agram_freqs,zeros(size(agram_freqs)),'r', 'linewidth', 1.5, 'displayname','Sum');
+plot(agram_freqs,zeros(size(agram_freqs)),'kx', 'linewidth', 1.5, 'displayname','Sum');
 hold off;
+legend hide;
+title('Filter Banks, flat response');
 %}
 
 %%
 fh.fig2 = figure('name', 'Matching Errors');
-[~] = ploterror(agram_freqs2, agram_comp2, C1sum, fs, fh.fig2, 'Interpolated', 'r:', true);
+[~] = ploterror(agram_freqs, agram_comp, C1sum, fs, fh.fig2, 'Interpolated', 'r:', true);
 [~] = ploterror(agram_freqs, agram_comp, C2sum, fs, fh.fig2, 'Iterative SE', 'b:', false);
+[~] = ploterror(agram_freqs, agram_comp, C3sum, fs, fh.fig2, 'Iterative SE w/slope', 'g:', false);
 
 %%
 fh.fig5 = figure('name', 'Filter banks');
-[~] = plotfig(C1(1).ir, fs, 'maglog', fh.fig5, 'C1(1).ir');
-[~] = plotfig(C1(2).ir, fs, 'maglog', fh.fig5, 'C1(2).ir');
-[~] = plotfig(C1(3).ir, fs, 'maglog', fh.fig5, 'C1(3).ir');
-[~] = plotfig(C1(4).ir, fs, 'maglog', fh.fig5, 'C1(4).ir');
-[~] = plotfig(C1(5).ir, fs, 'maglog', fh.fig5, 'C1(5).ir');
-[~] = plotfig(C1(6).ir, fs, 'maglog', fh.fig5, 'C1(6).ir');
-[~] = plotfig(C1(7).ir, fs, 'maglog', fh.fig5, 'C1(7).ir');
-[~] = plotfig(C1(8).ir, fs, 'maglog', fh.fig5, 'C1(8).ir');
-[~] = plotfig(C1sum, fs, 'maglog', fh.fig5, 'fbsum');
+[~] = plotfig(C3(1).ir, fs, 'maglog', fh.fig5, 'C1', 'k');
+[~] = plotfig(C3(2).ir, fs, 'maglog', fh.fig5, 'C2', 'k');
+[~] = plotfig(C3(3).ir, fs, 'maglog', fh.fig5, 'C3', 'k');
+[~] = plotfig(C3(4).ir, fs, 'maglog', fh.fig5, 'C4', 'k');
+[~] = plotfig(C3(5).ir, fs, 'maglog', fh.fig5, 'C5', 'k');
+[~] = plotfig(C3(6).ir, fs, 'maglog', fh.fig5, 'C6', 'k');
+[~] = plotfig(C3(7).ir, fs, 'maglog', fh.fig5, 'C7', 'k');
+[~] = plotfig(C3(8).ir, fs, 'maglog', fh.fig5, 'C8', 'k');
+[~] = plotfig(C3sum, fs, 'maglog', fh.fig5, 'Sum', 'g');
 hold on;
 % plot(audiogram_freqs,audiogram_comp,'kx:', 'linewidth', 1.5); % alex
-plot(agram_freqs2,agram_comp2,'kx:', 'linewidth', 1.5); % sarah
+plot(agram_freqs,agram_comp,'kx:', 'linewidth', 1.5); % sarah
 hold off;
-ylim([0,100]);
+ylim([10,100]);
+legend hide;
+title('Audiogram Match (Iterative Optimization)');
 
 %{
 fh.fig6 = figure('name', 'Filter banks IR');
@@ -173,7 +185,8 @@ fh.fig6 = figure('name', 'Filter banks IR');
 [~] = plotfig(C(8).ir, fs, 'imp', fh.fig6, 'B(8).ir');
 %}
 %%
-
-fh.fig4 = plotfig(x, fs, 'maglog', [], 'X');
-[~] = plotfig(sumtest, fs, 'maglog', fh.fig4, 'Y');
-ylim([-20,80]);
+fh.fig4 = figure('name','Signal In/Out');
+[~] = plotfig(x, fs, 'maglog', fh.fig4, 'X', []);
+[~] = plotfig(Ysum, fs, 'maglog', fh.fig4, 'Y', []);
+title('Signal In/Out');
+ylim([-20,100]);
